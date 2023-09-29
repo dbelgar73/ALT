@@ -62,11 +62,40 @@ def levenshtein_edicion(x, y, threshold=None):
 
 def levenshtein_reduccion(x, y, threshold=None):
     # completar versión con reducción coste espacial
-    return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # Para realizar este algoritmo tomamos dos vectores en vez de toda la matriz
+    lenX, lenY = len(x) + 1, len(y) + 1
+    row1 = list(range(lenX))
+    row2 = [None] * lenX
+
+    for i in range(1, lenY):
+        row1, row2 = row2, row1
+        row1[0] = i
+        for j in range(1, lenX):
+            row1[j] = min(
+                row1[j - 1] + 1,
+                row2[j] + 1,
+                row2[j - 1] + (x[j - 1] != y[i - 1])
+            )
+    return row1[-1]
 
 def levenshtein(x, y, threshold):
-    # completar versión reducción coste espacial y parada por threshold
-    return min(0,threshold+1) # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # Considerar el threshold como limite
+    lenX, lenY = len(x) + 1, len(y) + 1
+    row1 = list(range(lenX))
+    row2 = [None] * lenX
+
+    for i in range(1, lenY):
+        row1, row2 = row2, row1
+        row1[0] = i
+        for j in range(1, lenX):
+            row1[j] = min(
+                row1[j - 1] + 1,
+                row2[j] + 1,
+                row2[j - 1] + (x[j - 1] != y[i - 1])
+            )
+        if all(d > threshold for d in row1):
+            return threshold + 1
+    return min(row1[-1],threshold+1)
 
 def levenshtein_cota_optimista(x, y, threshold):
     return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
