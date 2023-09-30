@@ -45,12 +45,12 @@ def levenshtein_edicion(x, y, threshold=None):
             l.append((x[i-1],y[j-1]))
             i -= 1
             j -= 1
-        elif D[i+1][j] == m:
-            l.append(("",y[j-1]))
-            i -= 1
-        else:
+        elif D[i-1][j] == m:
             l.append((x[i-1],""))
             i -= 1
+        else:
+            l.append(("",y[j-1]))
+            j -= 1
     while(i > 0):
         l.append((x[i-1],""))
         i -= 1
@@ -58,7 +58,7 @@ def levenshtein_edicion(x, y, threshold=None):
         l.append(("",y[j-1]))
         j-=1
     l.reverse()
-    return l
+    return D[lenX][lenY],l
 
 def levenshtein_reduccion(x, y, threshold=None):
     # completar versión con reducción coste espacial
