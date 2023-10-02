@@ -98,38 +98,20 @@ def levenshtein(x, y, threshold):
     return min(row1[-1],threshold+1)
 
 def levenshtein_cota_optimista(x, y, threshold):
-    #contar nº veces que aparece cada caracter en x (por ejemplo casa-> {c:1 a:2 s:1})
-    f1 = lambda l1: dict(map(lambda item: (item, l1.count(item)), l1))
-    listaX = f1(x) #caracter con nºde veces que aparece
-    #contar nº veces que aparece cada caracter en y (en negativo)
-    f2 = lambda l1: dict(map(lambda item: (item, -(l1.count(item))), l1))
-    listaY = f2(y)
-    #por cada caracter que aparece en las dos cadenas X, Y, calcular la diferencia (p. ejem. {c:1 a:0 s:1 b:-1 d:-1} "a" aparece 2 veces en casa y 2 veces en abad, 2-2=0)
-    # Calcular la diferencia en la frecuencia de caracteres entre x e y
-    diferencia = {}
-    for char in listaX:
-        if char in listaY:
-            count_x = listaX[char]
-            count_y = listaY.get(char, 0)
-            diferencia[char] = count_x + count_y       
-    for char in listaX:
-        if char not in listaY:
-            count_x = listaX[char]
-            diferencia[char] = count_x       
-    for char in listaY:
-        if char not in listaX:
-            count_y = listaY[char]
-            diferencia[char] = count_y    
-    # Sumar las frecuencias de caracteres en x e y
-    v_pos = sum(count for count in diferencia.values() if count > 0)
-    v_neg = sum(count for count in diferencia.values() if count < 0)
-    #cota optimista = max(|valores positivos|, |valores negativos|)
-    cota_optimista = max(abs(v_pos), abs(v_neg))
-    #si cota_optimista > threshold -> devolver threshold+1
-    if cota_optimista > threshold:
-        return threshold+1
+    f=lambda l1, l2: dict(map(lambda item: (item, l1.count(item) - l2.count(item)), set(l1+l2)))#se obtienen los caracteres y el nºveces que aparecen, para y se cuenta en negativo y se suman las listas
+    l = f(x,y) #se crea una lista con la diferencia de caracteres entre x y como se indica =>Ejemplo x=casa y=abad ->{c:1 a:0 s:1 b:-1 d:-1}
+    #print(l)
+    pos, neg= 0,0 #se cuentan los valores para calcular la cota
+    for valor in l.values(): #recorre la lista p.ej. {c:1 a:0 s:1 b:-1 d:-1} y suma los positivos en pos y los negativos en neg
+        if valor > 0:
+            pos+=v 
+        else:
+            neg+=v
+    cotaOptimista = max(abs(neg), pos) #calculo de la cota optimista
+    if cotaOptimista > threshold: return threshold+1
     return levenshtein(x, y, threshold)
-    #Para x=casa y=abad -> {'c': 1, 'a': 2, 's': 1}, {'a': -2, 'b': -1, 'd': -1},Salida:: Valor positivo:  2, Valor negativo:  -2, Cota optimista:  2, La distancia de Levenshtein cota optimista entre 'casa' y 'abad' es <= 3
+    #Para x=casa y=abad -> {'c': 1, 'a': 2, 's': 1}, {'a': -2, 'b': -1, 'd': -1},Salida:: Valor positivo:  2, Valor negativo:  -2, Cota optimista:  2 (<thrshld 3), 
+    #La distancia de Levenshtein cota optimista entre 'casa' y 'abad' es <= 3
 
 def damerau_restricted_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein restringida con matriz
