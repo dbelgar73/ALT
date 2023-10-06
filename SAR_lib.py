@@ -7,6 +7,8 @@ import math
 from pathlib import Path
 from typing import Optional, List, Union, Dict
 import pickle
+from distancias import opcionesSpell
+from spellsuggester import SpellSuggester
 
 ##################################################
 ##                                              ##
@@ -61,6 +63,8 @@ class SAR_Indexer:
         self.show_snippet = False # valor por defecto, se cambia con self.set_snippet()
         self.use_stemming = False # valor por defecto, se cambia con self.set_stemming()
         # ALT - COMPLETAR
+        self.use_spelling = False
+        self.speller = None
 
     ###############################
     ###                         ###
@@ -283,9 +287,13 @@ class SAR_Indexer:
                 "distance" cadena, nombre de la función de distancia.
                 "threshold" entero, umbral del corrector
         """
+        # ALT - COMPLETAR   
+        self.use_spelling=use_spelling
+        if(use_spelling):
+            vocab = list(self.index)
+            self.speller = SpellSuggester(opcionesSpell, vocab, distance, threshold)
         
-        # ALT - COMPLETAR        
-        pass
+             
 
     def tokenize(self, text:str):
         """
@@ -438,6 +446,12 @@ class SAR_Indexer:
         # ALT - MODIFICAR
         term = term.lower()
         r1 = self.index[field].get(term, [])
+        if(self.use_spelling & r1==[]):
+            suggested = self.speller.suggest(term)
+            for word in suggested:
+                r2 = self.index[field].get(word, [])
+                r1 = self.or_posting(r1, r2)
+ 
         return r1
 
 
