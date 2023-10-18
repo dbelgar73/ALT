@@ -102,8 +102,8 @@ def levenshtein_cota_optimista(x, y, threshold):
     l = f(x,y) #se crea una lista con la diferencia de caracteres entre x y como se indica =>Ejemplo x=casa y=abad ->{c:1 a:0 s:1 b:-1 d:-1}
     #print(l)
     pos, neg= 0,0 #se cuentan los valores para calcular la cota
-    for valor in l.values(): #recorre la lista p.ej. {c:1 a:0 s:1 b:-1 d:-1} y suma los positivos en pos y los negativos en neg
-        if valor > 0:
+    for v in l.values(): #recorre la lista p.ej. {c:1 a:0 s:1 b:-1 d:-1} y suma los positivos en pos y los negativos en neg
+        if v > 0:
             pos+=v 
         else:
             neg+=v
