@@ -4,7 +4,7 @@ def levenshtein_matriz(x, y, threshold=None):
     # esta versión no utiliza threshold, se pone porque se puede
     # invocar con él, en cuyo caso se ignora
     lenX, lenY = len(x), len(y)
-    D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
         D[i][0] = D[i - 1][0] + 1
     for j in range(1, lenY + 1):
@@ -20,7 +20,7 @@ def levenshtein_matriz(x, y, threshold=None):
 def levenshtein_edicion(x, y, threshold=None):
     # a partir de la versión levenshtein_matriz
     lenX, lenY = len(x), len(y)
-    D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
         D[i][0] = D[i - 1][0] + 1
     for j in range(1, lenY + 1):
@@ -253,70 +253,109 @@ def damerau_restricted(x, y, threshold=None):
 
 def damerau_intermediate_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein intermedia con matriz
-    """
-                |   m[j-1][i]+1
-                |   m[j][i-1]+1
-    Damerou->min|   m[j-1][i-1]+(x[i-1]!=y[j-1])
-                |   m[j-2][i-2]+1 si x[i-2]==y[j-1] and x[i-1]==y[j-2]
-    acb -> ba   |   m[j-3][i-3]+2 si x[i-3]==y[j-1] and x[i-1]==y[j-2]
-    ab  -> bca  |   m[j-3][i-3]+2 si x[i-1]==y[j-3] and x[i-2]==y[j-1]
-    """
-    lenX,lenY=len(x),len(y)
-    row0=list(range(lenX+1))
-    row1,row2,row3=[0]*(lenX+1),[0]*(lenX+1),[0]*(lenX+1)
-    row1[0]=1
-
-    if lenX < 2 or lenY < 2:
-        return levenshtein_reduccion(x,y)
-
-    c=0
-    #CASO DE QUE PALABRAS len MENOR QUE DOS
-    for i in range(1,lenX+1):
-        row1[i]=min(row1[i-1]+1,row0[i]+1,row0[i-1]+(x[i-1]!=y[0]))
-
-    
-    row2[0]=2
-    for i in range(1,lenX+1):
-        row2[i]=min(row2[i-1]+1,row1[i]+1,row1[i-1]+(x[i-1]!=y[1]))
-        if i>1 and x[i-2]==y[1] and x[i-1]==y[0]:
-            if 1+row0[i-2]<row2[i]:
-                row2[i]=1+row0[i-2]
-
-    for j in range(3,lenY+1):
-        row3[0]=j
-        for i in range(1,lenX+1):
-            row2[i]=min(row2[i-1]+1,row1[i]+1,row1[i-1]+(x[i-1]!=y[1]))
-            if i>1 and x[i-2]==y[1] and x[i-1]==y[0]:
-                if 1+row0[i-2]<row2[i]:
-                    row2[i]=1+row0[i-2]
-            if i>2 and j>2 and x[i-3]==y[j-1] and x[i-1]==y[j-2]:#acb->ba
-                if row0[i-2]+2<row3[i]:
-                    row3[i]=row0[i-2]+2
-
-            if i>2 and j>2 and x[i-1]==y[j-3] and x[i-2]==y[j-1]:#ab->bca
-                if row0[i-2]+2<row3[i]:
-                    row3[i]=row0[i-2]+2
-        
-        row0=row1
-        row1=row2.copy()
-        row2=row3.copy()
-
-        if min(row2)>threshold: 
-            c+=1
-            if c > 2:
-                return threshold+1
-
-    return row2[lenX]
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
+    for i in range(1, lenX + 1):
+        D[i][0] = D[i - 1][0] + 1
+    for j in range(1, lenY + 1):
+        D[0][j] = D[0][j - 1] + 1
+        for i in range(1, lenX + 1):
+            D[i][j] = min(
+                D[i - 1][j] + 1,
+                D[i][j - 1] + 1,
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+                D[i-2][j-2]+1 if (i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1]) else float('inf'),
+                D[i-2][j-3]+2 if (i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1]) else float('inf'),
+                D[i-3][j-2]+2 if (i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1]) else float('inf')  
+            )
+    return D[lenX, lenY]
 
 def damerau_intermediate_edicion(x, y, threshold=None):
     # partiendo de matrix_intermediate_damerau añadir recuperar
     # secuencia de operaciones de edición
     # completar versión Damerau-Levenstein intermedia con matriz
-    return 0,[0,0] # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
+    for i in range(1, lenX + 1):
+        D[i][0] = D[i - 1][0] + 1
+    for j in range(1, lenY + 1):
+        D[0][j] = D[0][j - 1] + 1
+        for i in range(1, lenX + 1):
+            D[i][j] = min(
+                D[i - 1][j] + 1,
+                D[i][j - 1] + 1,
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+                D[i-2][j-2]+1 if (i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1]) else float('inf'),
+                D[i-2][j-3]+2 if (i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1]) else float('inf'),
+                D[i-3][j-2]+2 if (i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1]) else float('inf')  
+            )
+
+    i, j = lenX, lenY
+    l=[]
+    while(i > 0 and j > 0):
+        m = min(D[i-1][j], D[i][j-1], D[i-1][j-1])
+        
+        if i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1] and D[i-2][j-3]+2 <= m:
+            l.append((x[i - 2:i], y[j - 3:j]))
+            i -= 2
+            j -= 3
+        elif i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1] and D[i-3][j-2]+2 <= m:
+            l.append((x[i - 3:i], y[j - 2:j]))
+            i -= 3
+            j -= 2
+        elif i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1] and D[i-2][j-2]+1 <= m:
+            l.append((x[i - 2:i], y[j - 2:j]))
+            i -= 2
+            j -= 2
+        elif m == D[i-1][j-1]:
+                l.append((x[i-1], y[j-1]))
+                i -= 1
+                j -= 1
+        elif m == D[i][j-1]:
+            l.append(("", y[j-1]))
+            j -= 1
+        elif m == D[i-1][j]:
+            l.append((x[i-1], ""))
+            i -= 1        
+
+    while i > 0:
+        l.append((x[i-1], ""))
+        i -= 1
+    while j > 0:
+        l.append(("", y[j-1]))
+        j -= 1
+
+    l.reverse()
+    return D[lenX][lenY], l
     
 def damerau_intermediate(x, y, threshold=None):
     # versión con reducción coste espacial y parada por threshold
-    return min(0,threshold+1) # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    lenX, lenY = len(x), len(y)
+    row1 = list(range(lenX + 1))
+    row2 = [0] * (lenX + 1)
+    row3 = [0] * (lenX + 1)
+
+    for i in range(1, lenY + 1):
+        rowActual = [0] * (lenX + 1)
+        rowActual[0] = i
+        for j in range(1, lenX + 1):
+            rowActual[j] = min(
+                rowActual[j - 1] + 1,
+                row1[j] + 1,
+                row1[j - 1] + (x[j - 1] != y[i - 1]),
+                row2[j - 2] + 1 if (i > 1 and j > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 2]) else float('inf'),
+                row2[j - 3] + 2 if (i > 1 and j > 2 and x[j - 1] == y[i - 2] and x[j - 3] == y[i - 1]) else float('inf'),
+                row3[j - 2] + 2 if (i > 2 and j > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 3]) else float('inf')
+            )
+        row3 = row2.copy()
+        row2 = row1.copy()
+        row1 = rowActual.copy()
+        
+        if threshold is not None and all(d > threshold for d in rowActual):
+            return threshold + 1
+    return min(rowActual[-1], threshold + 1)
 
 opcionesSpell = {
     'levenshtein_m': levenshtein_matriz,
