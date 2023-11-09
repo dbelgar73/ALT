@@ -99,7 +99,7 @@ def levenshtein(x, y, threshold):
 
 def levenshtein_cota_optimista(x, y, threshold):
     f=lambda l1, l2: dict(map(lambda item: (item, l1.count(item) - l2.count(item)), set(l1+l2)))#se obtienen los caracteres y el nºveces que aparecen, para y se cuenta en negativo y se suman las listas
-    l = f(x,y) #se crea una lista con la diferencia de caracteres entre x y como se indica =>Ejemplo x=casa y=abad ->{c:1 a:0 s:1 b:-1 d:-1}
+    l = f(x,y) #se crea una lista con la diferenciprinta de caracteres entre x y como se indica =>Ejemplo x=casa y=abad ->{c:1 a:0 s:1 b:-1 d:-1}
     #print(l)
     pos, neg= 0,0 #se cuentan los valores para calcular la cota
     for v in l.values(): #recorre la lista p.ej. {c:1 a:0 s:1 b:-1 d:-1} y suma los positivos en pos y los negativos en neg
@@ -189,10 +189,8 @@ def damerau_restricted_edicion(x, y, threshold=None):
                     d = m[j-2][i-2]+1
                     if d <= m[j][i]:
                         m[j][i] = d
-                        r[j][i] = False
-    
-    print(m)
-
+                        r[j-1][i-1] = False
+    #print(m)
     l=[]
     while(i > 0 and j > 0):
         s = min(m[j-1][i],m[j][i-1],m[j-1][i-1])
@@ -200,7 +198,7 @@ def damerau_restricted_edicion(x, y, threshold=None):
             l.append((x[i-2]+x[i-1],x[i-1]+x[i-2]))
             i -= 2
             j -= 2
-        elif s == m[i-1][j-1]:
+        elif s == m[j-1][i-1]:
             l.append((x[i-1],y[j-1]))
             i -= 1
             j -= 1
@@ -224,12 +222,17 @@ def damerau_restricted(x, y, threshold=None):
     # versión con reducción coste espacial y parada por threshold
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
     lenX,lenY=len(x),len(y)
-    row0=list(range(lenX+1))
-    row1,row2=[0]*(lenX+1),[0]*(lenX+1)
-    row1[0]=1
-
+    
     if lenX < 2 or lenY < 2:
         return levenshtein_reduccion(x,y)
+    
+    row0=list(range(lenX+1))
+    row1=[0]*(lenX+1)
+    row2 = row1.copy()
+    row1[0]=1
+
+    bools0 = [True]*(lenX+1)
+    bools1 = bools0.copy()
 
     c=0
     #CASO DE QUE PALABRAS len MENOR QUE DOS
@@ -240,10 +243,12 @@ def damerau_restricted(x, y, threshold=None):
         row2[0]=j
         for i in range(1,lenX+1):
             row2[i]=min(row2[i-1]+1,row1[i]+1,row1[i-1]+(x[i-1]!=y[j-1]))
-            if i>1 and x[i-2]==y[j-1] and x[i-1]==y[j-2]:
+            if i>1 and x[i-2]==y[j-1] and x[i-1]==y[j-2] and bools0[i-2]:
                 if 1+row0[i-2]<row2[i]:
                     row2[i]=1+row0[i-2]
-        
+                    bools1[i-1]=False
+        bools0 = bools1
+        bools1 = [True]*(lenX+1)
         row0=row1
         row1=row2.copy()
 
@@ -251,6 +256,8 @@ def damerau_restricted(x, y, threshold=None):
             c+=1
             if c > 2:
                 return threshold+1
+        else:
+            c = 0
 
     return row2[lenX]
 
