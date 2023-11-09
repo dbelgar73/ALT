@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional, List, Union, Dict
 import pickle
 from distancias import opcionesSpell
+from distancias import levenshtein_cota_optimista
 from spellsuggester import SpellSuggester
 
 ##################################################
@@ -291,6 +292,7 @@ class SAR_Indexer:
         self.use_spelling=use_spelling
         if(use_spelling):
             vocab = list(self.index)
+	    distance = levenshtein_cota_optimista
             self.speller = SpellSuggester(opcionesSpell, vocab, distance, threshold)
         
              
