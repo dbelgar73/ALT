@@ -235,9 +235,11 @@ def damerau_restricted(x, y, threshold=None):
     bools1 = bools0.copy()
 
     c=0
-    #CASO DE QUE PALABRAS len MENOR QUE DOS
+
     for i in range(1,lenX+1):
         row1[i]=min(row1[i-1]+1,row0[i]+1,row0[i-1]+(x[i-1]!=y[0]))
+    
+    if min(row1)>threshold: c+=1
 
     for j in range(2,lenY+1):
         row2[0]=j
@@ -258,6 +260,8 @@ def damerau_restricted(x, y, threshold=None):
                 return threshold+1
         else:
             c = 0
+
+    if row2[lenX]>threshold: return threshold+1
 
     return row2[lenX]
 
