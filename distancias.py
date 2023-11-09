@@ -4,7 +4,7 @@ def levenshtein_matriz(x, y, threshold=None):
     # esta versión no utiliza threshold, se pone porque se puede
     # invocar con él, en cuyo caso se ignora
     lenX, lenY = len(x), len(y)
-    D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
         D[i][0] = D[i - 1][0] + 1
     for j in range(1, lenY + 1):
@@ -20,7 +20,7 @@ def levenshtein_matriz(x, y, threshold=None):
 def levenshtein_edicion(x, y, threshold=None):
     # a partir de la versión levenshtein_matriz
     lenX, lenY = len(x), len(y)
-    D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
         D[i][0] = D[i - 1][0] + 1
     for j in range(1, lenY + 1):
@@ -190,10 +190,13 @@ def damerau_restricted_edicion(x, y, threshold=None):
                     if d <= m[j][i]:
                         m[j][i] = d
                         r[j][i] = False
+    
+    print(m)
+
     l=[]
     while(i > 0 and j > 0):
         s = min(m[j-1][i],m[j][i-1],m[j-1][i-1])
-        if i > 2 and j > 2 and (x[i-2]==y[j-1] and x[i-1]==y[j-2]) and m[j-2][i-2]<=s:
+        if i > 1 and j > 1 and (x[i-2]==y[j-1] and x[i-1]==y[j-2]) and m[j-2][i-2]<=s:
             l.append((x[i-2]+x[i-1],x[i-1]+x[i-2]))
             i -= 2
             j -= 2
