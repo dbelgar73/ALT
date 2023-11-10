@@ -33,10 +33,9 @@ def levenshtein_edicion(x, y, threshold=None):
             )
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
     '''
-        l : lista de tuplas a devolver.
-
-        Los dos ultimos bucles se recorren en el caso de
-        que se choque contra una pared de la matriz
+        Tres bucles con los que se añaden las tuplas a l,
+        lista que represneta la secuencia de ecición. Esta
+        se ha de voltear para que esté bien ordenada.
     '''
     l=[]
     while(i > 0 and j > 0):
