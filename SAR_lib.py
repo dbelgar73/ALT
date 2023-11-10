@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Optional, List, Union, Dict
 import pickle
 from distancias import opcionesSpell
-from distancias import levenshtein_cota_optimista
 from spellsuggester import SpellSuggester
 
 ##################################################
