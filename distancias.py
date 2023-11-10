@@ -130,14 +130,6 @@ def damerau_restricted_matriz(x, y, threshold=None):
     for j in range(1,lenY+1):
         m[j][0]=j
 
-    '''
-    Para implementar este metodo como restricted
-    incluyo una matriz e booleanos 'r'. Cada celda
-    tendra asociado un valor conforme se puede reusar
-    o no
-    '''
-    
-    r = np.full((lenY+1,lenX+1), True)
     
     for j in range(1,lenY+1):
         for i in range(1,lenX+1):
@@ -147,11 +139,10 @@ def damerau_restricted_matriz(x, y, threshold=None):
                 m[j-1][i-1]+(x[i-1]!=y[j-1])
             )
             if j > 1 and i > 1:
-                if r[j-2][i-2] and x[i-1]==y[j-2] and x[i-2]==y[j-1]:
+                if x[i-1]==y[j-2] and x[i-2]==y[j-1]:
                     d = m[j-2][i-2]+1
                     if d <= m[j][i]:
                         m[j][i] = d
-                        r[j][i] = False
 
     return m[lenY, lenX]
 
@@ -174,8 +165,6 @@ def damerau_restricted_edicion(x, y, threshold=None):
     for j in range(1,lenY+1):
         m[j][0]=j
     
-    r = np.full((lenY+1,lenX+1), True)
-    
     for j in range(1,lenY+1):
         for i in range(1,lenX+1):
             m[j][i]=min(
@@ -184,11 +173,10 @@ def damerau_restricted_edicion(x, y, threshold=None):
                 m[j-1][i-1]+(x[i-1]!=y[j-1])
             )
             if j > 1 and i > 1:
-                if r[j-2][i-2] and x[i-1]==y[j-2] and x[i-2]==y[j-1]:
+                if x[i-1]==y[j-2] and x[i-2]==y[j-1]:
                     d = m[j-2][i-2]+1
                     if d <= m[j][i]:
                         m[j][i] = d
-                        r[j-1][i-1] = False
     #print(m)
     l=[]
     while(i > 0 and j > 0):
@@ -230,9 +218,6 @@ def damerau_restricted(x, y, threshold=None):
     row2 = row1.copy()
     row1[0]=1
 
-    bools0 = [True]*(lenX+1)
-    bools1 = bools0.copy()
-
     c=0
 
     for i in range(1,lenX+1):
@@ -244,12 +229,9 @@ def damerau_restricted(x, y, threshold=None):
         row2[0]=j
         for i in range(1,lenX+1):
             row2[i]=min(row2[i-1]+1,row1[i]+1,row1[i-1]+(x[i-1]!=y[j-1]))
-            if i>1 and x[i-2]==y[j-1] and x[i-1]==y[j-2] and bools0[i-2]:
+            if i>1 and x[i-2]==y[j-1] and x[i-1]==y[j-2]:
                 if 1+row0[i-2]<row2[i]:
                     row2[i]=1+row0[i-2]
-                    bools1[i-1]=False
-        bools0 = bools1
-        bools1 = [True]*(lenX+1)
         row0=row1
         row1=row2.copy()
 
