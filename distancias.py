@@ -266,29 +266,32 @@ def damerau_restricted(x, y, threshold=None):
     return row2[lenX]
 
 def damerau_intermediate_matriz(x, y, threshold=None):
-    # completar versión Damerau-Levenstein intermedia con matriz
+    # versión Damerau-Levenshtein intermedia con matriz
     lenX, lenY = len(x), len(y)
+    # inicialización de la matriz de resultados intermedios a zeros
     D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
-        D[i][0] = D[i - 1][0] + 1
+        D[i][0] = D[i - 1][0] + 1 # primera fila de Levenshtein 
     for j in range(1, lenY + 1):
-        D[0][j] = D[0][j - 1] + 1
+        D[0][j] = D[0][j - 1] + 1 # primera columna de Levenshtein
         for i in range(1, lenX + 1):
             D[i][j] = min(
-                D[i - 1][j] + 1,
-                D[i][j - 1] + 1,
-                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+                D[i - 1][j] + 1, # borrado
+                D[i][j - 1] + 1, # inserción
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]), # sustitución
+                # Damerau
+                # intercambio (versión restringida)
                 D[i-2][j-2]+1 if (i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1]) else float('inf'),
+                # intercambio (version intermedia)
                 D[i-2][j-3]+2 if (i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1]) else float('inf'),
+                # intercambio (versión intermedia)
                 D[i-3][j-2]+2 if (i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1]) else float('inf')  
             )
     return D[lenX, lenY]
 
 def damerau_intermediate_edicion(x, y, threshold=None):
-    # partiendo de matrix_intermediate_damerau añadir recuperar
-    # secuencia de operaciones de edición
-    # completar versión Damerau-Levenstein intermedia con matriz
-    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # versión Damerau-Levenshtein intermedia con matriz
+    # con recuperación de secuencia de operaciones de edición
     lenX, lenY = len(x), len(y)
     D = np.zeros((lenX + 1, lenY + 1), dtype=int)
     for i in range(1, lenX + 1):
@@ -297,56 +300,71 @@ def damerau_intermediate_edicion(x, y, threshold=None):
         D[0][j] = D[0][j - 1] + 1
         for i in range(1, lenX + 1):
             D[i][j] = min(
-                D[i - 1][j] + 1,
-                D[i][j - 1] + 1,
-                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+                D[i - 1][j] + 1, # borrado
+                D[i][j - 1] + 1, # inserción
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]), # sustitución
+                # Damerau
+                # intercambio (versión restringida)
                 D[i-2][j-2]+1 if (i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1]) else float('inf'),
+                # intercambio (version intermedia)
                 D[i-2][j-3]+2 if (i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1]) else float('inf'),
+                # intercambio (versión intermedia)
                 D[i-3][j-2]+2 if (i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1]) else float('inf')  
             )
 
+    # recuperación del camino
+    # se parte desde la última posición de la matriz de resultados intermedios y se recorre en sentido inverso
     i, j = lenX, lenY
-    l=[]
+    l=[] # lista del camino
     while(i > 0 and j > 0):
-        m = min(D[i-1][j], D[i][j-1], D[i-1][j-1])
+        m = min(D[i-1][j], D[i][j-1], D[i-1][j-1]) 
         
+        # caso intercambio (version intermedia)
         if i > 1 and j > 2 and x[i - 1] == y[j - 3] and x[i - 2] == y[j - 1] and D[i-2][j-3]+2 <= m:
             l.append((x[i - 2:i], y[j - 3:j]))
+            # retrocedo en D
             i -= 2
             j -= 3
+        # caso intercambio (version intermedia)
         elif i > 2 and j > 1 and x[i - 1] == y[j - 2] and x[i - 3] == y[j - 1] and D[i-3][j-2]+2 <= m:
             l.append((x[i - 3:i], y[j - 2:j]))
             i -= 3
             j -= 2
+        # caso intercambio (version restringida)
         elif i > 1 and j > 1 and x[i - 1] == y[j - 2] and x[i - 2] == y[j - 1] and D[i-2][j-2]+1 <= m:
             l.append((x[i - 2:i], y[j - 2:j]))
             i -= 2
             j -= 2
+        # caso sustitución
         elif m == D[i-1][j-1]:
                 l.append((x[i-1], y[j-1]))
                 i -= 1
                 j -= 1
+        # caso inserción
         elif m == D[i][j-1]:
             l.append(("", y[j-1]))
             j -= 1
+        # caso borrado
         elif m == D[i-1][j]:
             l.append((x[i-1], ""))
-            i -= 1        
-
+            i -= 1
+                    
+    # caso en el que aún queden simbolos de x (borrados)
     while i > 0:
         l.append((x[i-1], ""))
         i -= 1
+    # caso en el que aún queden simbolos de y (inserciones)
     while j > 0:
         l.append(("", y[j-1]))
         j -= 1
 
-    l.reverse()
+    l.reverse() # para dar el camino ordenado en sentido ascendente
     return D[lenX][lenY], l
     
 def damerau_intermediate(x, y, threshold=None):
-    # versión con reducción coste espacial y parada por threshold
-    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # versión Damerau-Levenshtein con reducción coste espacial y parada por threshold
     lenX, lenY = len(x), len(y)
+    # ventana de los únicos 3 vectores que se necesitan para realizar las comprobaciones
     row1 = list(range(lenX + 1))
     row2 = [0] * (lenX + 1)
     row3 = [0] * (lenX + 1)
@@ -356,13 +374,18 @@ def damerau_intermediate(x, y, threshold=None):
         rowActual[0] = i
         for j in range(1, lenX + 1):
             rowActual[j] = min(
-                rowActual[j - 1] + 1,
-                row1[j] + 1,
-                row1[j - 1] + (x[j - 1] != y[i - 1]),
+                rowActual[j - 1] + 1, # borrado
+                row1[j] + 1, # inserción
+                row1[j - 1] + (x[j - 1] != y[i - 1]), # sustitución
+                # Damerau
+                # intercambio (versión restringida)
                 row2[j - 2] + 1 if (i > 1 and j > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 2]) else float('inf'),
+                # intercambio (versión intermedia)
                 row2[j - 3] + 2 if (i > 1 and j > 2 and x[j - 1] == y[i - 2] and x[j - 3] == y[i - 1]) else float('inf'),
+                # intercambio (versión intermedia)
                 row3[j - 2] + 2 if (i > 2 and j > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 3]) else float('inf')
             )
+        # reasignación de los vectores para la próxima iteración    
         row3 = row2.copy()
         row2 = row1.copy()
         row1 = rowActual.copy()
