@@ -10,7 +10,7 @@ class SpellSuggester:
     def __init__(self,
                  dist_functions,
                  vocab = [],
-                 default_distance = None,
+                 default_distance = levenshtein_cota_optimista,
                  default_threshold = None):
         
         """Método constructor de la clase SpellSuggester
