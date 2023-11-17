@@ -446,7 +446,7 @@ class SAR_Indexer:
         # ALT - MODIFICAR
         term = term.lower()
         r1 = self.index[field].get(term, [])
-        if(self.use_spelling & r1==[]):
+        if(self.use_spelling and r1==[]):
             suggested = self.speller.suggest(term)
             for word in suggested:
                 r2 = self.index[field].get(word, [])
